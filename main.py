@@ -10,13 +10,16 @@ attempts = 3 # Change the value to -1 for infinite attempts
 # Set the caption
 pygame.display.set_caption("Brick Breaker")
 
-icon = pygame.image.load('images/icon.png')
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_icon(icon)
+
 # Load all the necessary images
 game_over_screen = pygame.image.load("images/game_over.png")
 paused_screen = pygame.image.load("images/paused_screen.png")
 finished_screen = pygame.image.load("images/finished_screen.png")
+icon = pygame.image.load('images/icon.png')
+
+# Set the icon
+pygame.display.set_icon(icon)
 
 # Load sound effects
 fall_sound = pygame.mixer.Sound("audio/fall.wav")
