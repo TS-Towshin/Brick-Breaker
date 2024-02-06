@@ -127,7 +127,6 @@ class Bricks:
 
 
 def pause():
-    clock.tick(12)  # Lower the fps when not needed
     screen.blit(shade_surface, (0, 0))
     screen.blit(paused_screen, (0, 0))
 
@@ -165,9 +164,11 @@ def main():
     running = True
 
     while running:
-        if not paused and not is_game_over():
+        if paused or is_game_over():
+            clock.tick(5)  # Lower the fps when not needed
+        else:
             clock.tick(60)
-        
+
         screen.fill((0, 0, 0))
         
         global keys
@@ -221,12 +222,11 @@ def main():
 
                 if toggle_ai:
                     ai()
-
-            elif paused:
+                
+            else:
                 pause()
             
         else:
-            clock.tick(12)
             screen.blit(game_over_screen, (0, 0))
             if keys[pygame.K_SPACE]:
                 retry()
