@@ -10,8 +10,9 @@ attempts = 3 # Change the value to -1 for infinite attempts
 # Set the caption
 pygame.display.set_caption("Brick Breaker")
 
+icon = pygame.image.load('images/icon.png')
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-
+pygame.display.set_icon(icon)
 # Load all the necessary images
 game_over_screen = pygame.image.load("images/game_over.png")
 paused_screen = pygame.image.load("images/paused_screen.png")
@@ -26,9 +27,6 @@ brick_sound = pygame.mixer.Sound("audio/brick.mp3")
 # Add a semi-tranparent effect on the pause screen
 shade_surface = pygame.Surface((WIDTH, HEIGHT)) 
 shade_surface.set_alpha(150)    
-
-paused = False
-win_music = True
 
 
 class Player:   
@@ -145,6 +143,9 @@ def is_game_over():
         return True
     return False
 
+def ai():
+    player.x = ball.x-45
+
 
 player = Player()
 ball = Ball()
@@ -153,66 +154,81 @@ bricks = Bricks()
 bricks.render_pos()
 
 clock = pygame.time.Clock()
-running = True
 
-while running:
-    if not paused and not is_game_over():
-        clock.tick(60)
-    
-    screen.fill((0, 0, 0))
-    
-    keys = pygame.key.get_pressed()
+def main():
+    paused = False
+    win_music = True
+    toggle_ai = False
+    running = True
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        if event.type == pygame.KEYDOWN:
-            if paused and event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    paused = False  # Unpauses the game
-            elif event.key == pygame.K_ESCAPE and not is_game_over() and not is_finished():
-                paused = True   # Pauses the game
-            elif is_game_over() and event.key == pygame.K_SPACE:
-                retry()
-            elif is_finished() and event.key == pygame.K_ESCAPE:  # Closes the game
-                running = False
-            elif is_finished() and event.key == pygame.K_SPACE:   # Starts the game again
-                retry()
-                win_music = True
-            elif is_game_over() and event.key == pygame.K_ESCAPE:
-                running = False
-
-    if not is_game_over():
+    while running:
+        if not paused and not is_game_over():
+            clock.tick(60)
         
-        # Render everything
-        player.render()
-        ball.render()
-        bricks.render()
-
-        if not paused:
-            player.move()
-            ball.move()
-            bricks.collision()
-
-            if ball.y > HEIGHT:
-                pygame.mixer.Sound.play(fall_sound)
-                if not is_finished():  # don't count attempts if the game is finished
-                    player.attempt -= 1
-                ball.respawn()
-
-            if is_finished():
-                if win_music:
-                    pygame.mixer.Sound.play(win)
-                    win_music = False
-                screen.blit(finished_screen, (0, 0))
-
-        elif paused:
-            pause()
+        screen.fill((0, 0, 0))
         
-    else:
-        clock.tick(12)
-        screen.blit(game_over_screen, (0, 0))
-        if keys[pygame.K_SPACE]:
-            retry()
+        global keys
+        keys = pygame.key.get_pressed()
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            if event.type == pygame.KEYDOWN:
+                if paused and event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        paused = False  # Unpauses the game
+                elif event.key == pygame.K_ESCAPE and not is_game_over() and not is_finished():
+                    paused = True   # Pauses the game
+                elif is_game_over() and event.key == pygame.K_SPACE:
+                    retry()
+                elif is_finished() and event.key == pygame.K_ESCAPE:  # Closes the game
+                    running = False
+                elif is_finished() and event.key == pygame.K_SPACE:   # Starts the game again
+                    retry()
+                    win_music = True
+                elif is_game_over() and event.key == pygame.K_ESCAPE:
+                    running = False
+                elif event.key == pygame.K_e:
+                    if not is_game_over():
+                        toggle_ai = not toggle_ai
 
-    pygame.display.update()
+        if not is_game_over():
+            
+            # Render everything
+            player.render()
+            ball.render()
+            bricks.render()
+
+            if not paused:
+                player.move()
+                ball.move()
+                bricks.collision()
+
+                if ball.y > HEIGHT:
+                    pygame.mixer.Sound.play(fall_sound)
+                    if not is_finished():  # don't count attempts if the game is finished
+                        player.attempt -= 1
+                    ball.respawn()
+
+                if is_finished():
+                    if win_music:
+                        pygame.mixer.Sound.play(win)
+                        win_music = False
+                    screen.blit(finished_screen, (0, 0))
+
+                if toggle_ai:
+                    ai()
+
+            elif paused:
+                pause()
+            
+        else:
+            clock.tick(12)
+            screen.blit(game_over_screen, (0, 0))
+            if keys[pygame.K_SPACE]:
+                retry()
+
+        pygame.display.update()
+
+if __name__=='__main__':
+    main()
